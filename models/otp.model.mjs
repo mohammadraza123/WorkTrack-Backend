@@ -20,6 +20,7 @@ const otpSchema = new mongoose.Schema(
       type: Date,
       required: true,
       default: () => Date.now() + 5 * 60 * 1000, // expires in 5 minutes
+      index: { expires: 0 }, //delete auto after expires
     },
   },
   { timestamps: true },
