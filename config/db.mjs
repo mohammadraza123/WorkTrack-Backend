@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv/config";
 
 const DB_USERNAME = process.env.DB_USERNAME;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -6,7 +7,7 @@ const DB_PASSWORD = process.env.DB_PASSWORD;
 const dbConnection = async () => {
   try {
     await mongoose.connect(
-      `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@weddingcluster.lg5fmhx.mongodb.net/?appName=weddingCluster`,
+      `mongodb+srv://raza123:${DB_PASSWORD}@cluster0.pzrya0o.mongodb.net/?appName=Cluster0`,
     );
     console.log("✅ DB Connected Successfully !");
   } catch (error) {
@@ -14,4 +15,4 @@ const dbConnection = async () => {
   }
 };
 
-module.exports = dbConnection;
+export default dbConnection;
