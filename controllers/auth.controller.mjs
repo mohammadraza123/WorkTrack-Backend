@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import UserModel from "../models/auth.model.mjs";
 import OtpModel from "../models/otp.model.mjs";
+import { sendOtpEmail } from "./sendOtp.controller.mjs";
 
 export const handleSignup = async (req, res) => {
   try {
