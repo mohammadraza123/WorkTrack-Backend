@@ -79,7 +79,7 @@ export const handleVerifyEmail = async (req, res) => {
   try {
     const { email, type, otp } = req.body;
 
-    //Validate Fields
+    // Validate fields
     if (!email || !type || !otp) {
       return res.status(400).json({
         success: false,
@@ -87,7 +87,7 @@ export const handleVerifyEmail = async (req, res) => {
       });
     }
 
-    // Find OTP and make sure it's not expired
+    // Find OTP and ensure it is valid
     const checkVerification = await OtpModel.findOne({
       email,
       type,
@@ -97,47 +97,56 @@ export const handleVerifyEmail = async (req, res) => {
 
     if (!checkVerification) {
       return res.status(401).json({
-        message: "Invalid or expired OTP",
         success: false,
+        message: "Invalid or expired OTP",
       });
     }
 
-    // Find user
-    const findUser = await UserModel.findOne({
-      email: checkVerification.email,
-    });
+    const findUser = await UserModel.findOne({ email });
 
     if (!findUser) {
       return res.status(404).json({
-        message: "User not found",
         success: false,
+        message: "User not found",
       });
     }
 
-    // if (findUser.isVerified) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Email already verified",
-    //   });
-    // }
+    // SIGNUP FLOW
+    if (type === "signup") {
+      if (findUser.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already verified",
+        });
+      }
 
-    // Update verification
-    findUser.isVerified = true;
-    await findUser.save();
+      findUser.isVerified = true;
+      await findUser.save();
 
-    // Delete OTP
-    await OtpModel.deleteOne({ email, type, otp });
+      // delete otp after signup verification
+      await OtpModel.deleteOne({ _id: checkVerification._id });
+    }
 
-    // Send success response
+    // FORGOT PASSWORD FLOW
+    if (type === "forgot") {
+      // mark otp verified instead of deleting
+      checkVerification.verified = true;
+      await checkVerification.save();
+    }
+
     return res.status(200).json({
-      message: "Email verified successfully",
       success: true,
+      message:
+        type === "signup"
+          ? "Email verified successfully"
+          : "OTP verified successfully",
     });
   } catch (error) {
     console.error("error in verify email", error);
+
     return res.status(500).json({
-      message: "Internal server error",
       success: false,
+      message: "Internal server error",
     });
   }
 };
