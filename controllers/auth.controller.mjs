@@ -114,12 +114,12 @@ export const handleVerifyEmail = async (req, res) => {
       });
     }
 
-    if (findUser.isVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already verified",
-      });
-    }
+    // if (findUser.isVerified) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Email already verified",
+    //   });
+    // }
 
     // Update verification
     findUser.isVerified = true;
