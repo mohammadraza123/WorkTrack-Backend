@@ -2,20 +2,39 @@ import LeaveModel from "../models/leave.model.mjs";
 
 export const handleAddLeave = async (req, res) => {
   try {
-    const { reason } = req.body;
+    const { reason, startDate, endDate } = req.body;
 
-    if (!reason) {
+    if (!reason || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        message: "Reason required",
+        message: "Reason, startDate, and endDate are required",
       });
     }
 
-    const userId = req.user?.id; 
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start) || isNaN(end)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid date format",
+      });
+    }
+
+    if (end < start) {
+      return res.status(400).json({
+        success: false,
+        message: "endDate cannot be before startDate",
+      });
+    }
+
+    const userId = req.user?.id;
 
     const newLeave = new LeaveModel({
       user: userId,
       reason,
+      startDate: start,
+      endDate: end,
     });
 
     await newLeave.save();
