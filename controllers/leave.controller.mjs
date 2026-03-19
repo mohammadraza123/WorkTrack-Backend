@@ -105,8 +105,8 @@ export const handleGetById = async (req, res) => {
 
 export const handleUpdateLeaveStatus = async (req, res) => {
   try {
-    const { id } = req.params;           // leave ID from URL
-    const { status } = req.body;         // "approved" or "rejected"
+    const { id } = req.params;
+    const { status } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -131,16 +131,9 @@ export const handleUpdateLeaveStatus = async (req, res) => {
       });
     }
 
-    // Optional: only allow update if status is still pending
-    if (leave.status !== "pending") {
-      return res.status(400).json({
-        success: false,
-        message: "Leave request has already been processed"
-      });
-    }
+    // ← the pending check is gone, HR can update freely
 
     leave.status = status;
-
     await leave.save();
 
     return res.status(200).json({

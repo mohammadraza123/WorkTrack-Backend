@@ -12,5 +12,5 @@ router.get("/", handleGetAll);
 router.get("/:id", handleGetById);
 
 
-router.patch("/:id/status", authMiddleware, handleUpdateLeaveStatus);
+router.patch("/:id/status", handleUpdateLeaveStatus);
 export default router;
