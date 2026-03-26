@@ -11,7 +11,7 @@ export const authMiddleware = (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     // Use environment variable in real apps — never commit the real secret
-const secret = process.env.JWT_SECRET || "secret123";
+    const secret = process.env.JWT_SECRET || "secret123";
     if (!secret) {
       console.error("JWT_SECRET is not set in environment");
       return res.status(500).json({ message: "Server configuration error" });
@@ -19,7 +19,7 @@ const secret = process.env.JWT_SECRET || "secret123";
 
     const decoded = jwt.verify(token, secret);
 
-    req.user = decoded;     // contains { email, id, iat, exp }
+    req.user = decoded; // contains { email, id, iat, exp }
 
     next();
   } catch (error) {
