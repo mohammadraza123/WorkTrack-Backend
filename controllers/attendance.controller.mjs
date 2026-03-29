@@ -93,6 +93,22 @@ export const getMonthlyReport = async (req, res) => {
   }
 };
 
+export const getTodayAttendance = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const today = new Date().toISOString().split("T")[0];
+
+    const record = await AttendanceModel.findOne({
+      user: userId,
+      date: today,
+    });
+
+    res.json(record || {});
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const sendAttendanceEmail = async (user, records, totalHours) => {
   const rows = records
     .map(
