@@ -1,49 +1,33 @@
 import cron from "node-cron";
-import AttendanceModel from "../models/attendance.model.mjs";
-import User from "../models/user.model.mjs";
-import { sendAdminReport } from "../utils/email.mjs";
+import { getAllUsers } from "@/services/user"; // fetch all users
+import { getMonthlyAttendance } from "../controllers/attendance.controller.mjs";
+import { generateAttendanceExcel } from "./excelSheet.mjs";
+import { sendEmailWithExcel } from "./sendEmailWithExcel.mjs";
 
-cron.schedule("59 23 28-31 * *", async () => {
+// Cron schedule: 1st day of every month at 12:00 AM
+cron.schedule("0 0 1 * *", async () => {
+  console.log("Running monthly attendance email job...");
+
   try {
-    console.log("Running monthly report cron...");
+    const users = await getAllUsers(); // Get all users from DB
 
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    const now = new Date();
+    const month = now.getMonth(); // 0-indexed
+    const year = now.getFullYear();
 
-    // ✅ Check if today is last day of month
-    if (tomorrow.getDate() !== 1) {
-      return; // not last day
+    for (const user of users) {
+      // 1️⃣ Get monthly attendance
+      const records = await getMonthlyAttendance(user._id, month, year);
+
+      // 2️⃣ Generate Excel
+      const buffer = await generateAttendanceExcel(records);
+
+      // 3️⃣ Send Email
+      await sendEmailWithExcel(user.email, buffer);
+
+      console.log(`Sent monthly report to ${user.email}`);
     }
-
-    // ✅ Get all users
-    const users = await User.find();
-
-    const report = [];
-
-    for (let user of users) {
-      const records = await AttendanceModel.find({
-        user: user._id,
-      });
-
-      let total = 0;
-
-      records.forEach((r) => {
-        total += r.totalHours || 0;
-      });
-
-      report.push({
-        name: user.name,
-        email: user.email,
-        totalHours: total.toFixed(2),
-      });
-    }
-
-    // ✅ Send email to admin
-    await sendAdminReport(report);
-
-    console.log("Monthly admin email sent ✅");
-  } catch (error) {
-    console.log("Cron error:", error);
+  } catch (err) {
+    console.error("Error in cron job:", err);
   }
 });

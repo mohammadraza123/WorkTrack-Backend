@@ -109,6 +109,28 @@ export const getTodayAttendance = async (req, res) => {
   }
 };
 
+export const getMonthlyAttendance = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { month, year } = req.query; // e.g., month = 3, year = 2026
+
+    const startDate = new Date(year, month - 1, 1); // month is 0-based
+    const endDate = new Date(year, month, 0); // last day of month
+
+    const records = await AttendanceModel.find({
+      user: userId,
+      date: {
+        $gte: startDate.toISOString().split("T")[0],
+        $lte: endDate.toISOString().split("T")[0],
+      },
+    }).sort({ date: 1 });
+
+    res.json(records);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const sendAttendanceEmail = async (user, records, totalHours) => {
   const rows = records
     .map(
