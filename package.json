@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "A Tracking System",
   "main": "index.mjs",
-
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "node index.mjs",
+    "start": "node index.mjs",
     "dev": "nodemon index.mjs"
   },
   "author": "",
@@ -19,6 +18,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.23.0",
+    "node-cron": "^4.2.1",
     "nodemailer": "^8.0.2",
     "nodemon": "^3.1.14"
   }

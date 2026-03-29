@@ -1,5 +1,6 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
+import "./cron/monthlyReport.mjs";
 import DbConnection from "./config/db.mjs";
 import authRouter from "./routes/auth.route.js";
 import leaveRouter from "./routes/leave.route.js";
