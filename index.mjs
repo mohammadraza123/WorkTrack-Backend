@@ -4,6 +4,7 @@ import express from "express";
 import DbConnection from "./config/db.mjs";
 import authRouter from "./routes/auth.route.js";
 import leaveRouter from "./routes/leave.route.js";
+import attendanceRouter from "./routes/attendance.route.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter); 
+app.use("/api/action", attendanceRouter); 
 app.use("/api/leave", leaveRouter); 
 
 
