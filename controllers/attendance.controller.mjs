@@ -1,4 +1,7 @@
+import { generateAttendanceExcel } from "../config/excelSheet.mjs";
+import { sendEmailWithExcel } from "../config/sendEmailWithExcel.mjs";
 import AttendanceModel from "../models/attendance.model.mjs";
+import UserModel from "../models/auth.model.mjs";
 
 export const checkIn = async (req, res) => {
   try {
@@ -199,4 +202,48 @@ export const sendAdminReport = async (usersReport) => {
       </div>
     `,
   });
+};
+
+export const sendMonthlyReports = async (req, res) => {
+  try {
+    // 🔐 Security (VERY IMPORTANT)
+    if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const users = await UserModel.find();
+
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
+    for (const user of users) {
+      // ✅ Get monthly attendance
+      const records = await AttendanceModel.find({
+        user: user._id,
+        date: {
+          $gte: `${year}-${String(month + 1).padStart(2, "0")}-01`,
+          $lte: `${year}-${String(month + 1).padStart(2, "0")}-31`,
+        },
+      });
+
+      if (!records.length) continue;
+
+      // ✅ Generate Excel
+      const buffer = await generateAttendanceExcel(records);
+
+      // ✅ Send Email
+      await sendEmailWithExcel(user.email, buffer);
+
+      console.log(`✅ Email sent to ${user.email}`);
+
+      // ⚠️ Delay (avoid spam limit)
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+
+    res.json({ message: "All emails sent successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
 };
