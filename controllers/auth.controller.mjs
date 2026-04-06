@@ -27,7 +27,6 @@ export const handleSignup = async (req, res) => {
 
     //Generate Otp
     const generateOtp = Math.floor(100000 + Math.random() * 900000).toString();
-console.log("generateOtp",generateOtp)
     // Remove old OTP
     await OtpModel.deleteMany({ email, type: "signup" });
 
@@ -202,6 +201,7 @@ export const handleLogin = async (req, res) => {
         email: isUserExist.email,
         isVerified: isUserExist.isVerified,
         token: jwtToken,
+        _id: isUserExist?._id,
       },
     });
   } catch (error) {

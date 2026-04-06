@@ -78,24 +78,6 @@ export const checkOut = async (req, res) => {
   }
 };
 
-export const getMonthlyReport = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    const records = await AttendanceModel.find({ user: userId });
-
-    let total = 0;
-
-    records.forEach((r) => {
-      total += r.totalHours || 0;
-    });
-
-    res.json({ totalHours: total, records });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 export const getTodayAttendance = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -112,98 +94,7 @@ export const getTodayAttendance = async (req, res) => {
   }
 };
 
-export const getMonthlyAttendance = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { month, year } = req.query; // e.g., month = 3, year = 2026
-
-    const startDate = new Date(year, month - 1, 1); // month is 0-based
-    const endDate = new Date(year, month, 0); // last day of month
-
-    const records = await AttendanceModel.find({
-      user: userId,
-      date: {
-        $gte: startDate.toISOString().split("T")[0],
-        $lte: endDate.toISOString().split("T")[0],
-      },
-    }).sort({ date: 1 });
-
-    res.json(records);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const sendAttendanceEmail = async (user, records, totalHours) => {
-  const rows = records
-    .map(
-      (r) => `
-      <tr>
-        <td>${r.date}</td>
-        <td>${new Date(r.checkIn).toLocaleTimeString()}</td>
-        <td>${r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : "-"}</td>
-        <td>${r.totalHours}</td>
-      </tr>
-    `,
-    )
-    .join("");
-
-  return sendEmail({
-    to: user.email,
-    subject: "Your Monthly Attendance Report",
-    html: `
-      <div style="font-family:Arial; padding:20px;">
-        <h2>Monthly Attendance</h2>
-
-        <table border="1" cellpadding="8" cellspacing="0">
-          <tr>
-            <th>Date</th>
-            <th>Check-In</th>
-            <th>Check-Out</th>
-            <th>Hours</th>
-          </tr>
-          ${rows}
-        </table>
-
-        <h3>Total Hours: ${totalHours}</h3>
-      </div>
-    `,
-  });
-};
-
-export const sendAdminReport = async (usersReport) => {
-  const rows = usersReport
-    .map(
-      (u) => `
-      <tr>
-        <td>${u.name}</td>
-        <td>${u.email}</td>
-        <td>${u.totalHours}</td>
-      </tr>
-    `,
-    )
-    .join("");
-
-  return sendEmail({
-    to: "admin@gmail.com",
-    subject: "All Employees Monthly Report",
-    html: `
-      <div style="font-family:Arial; padding:20px;">
-        <h2>Employees Report</h2>
-
-        <table border="1" cellpadding="8">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Total Hours</th>
-          </tr>
-          ${rows}
-        </table>
-      </div>
-    `,
-  });
-};
-
+// send all users monthly report via email and cronjob
 export const sendMonthlyReports = async (req, res) => {
   try {
     // 🔐 Security (VERY IMPORTANT)
@@ -244,6 +135,47 @@ export const sendMonthlyReports = async (req, res) => {
     res.json({ message: "All emails sent successfully" });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//add location
+export const addLocation = async (req, res) => {
+  try {
+    const userId = req.user.id; // get from auth middleware
+    const { locationName } = req.body;
+
+    if (!locationName) {
+      return res.status(400).json({ message: "Location name is required" });
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const record = await AttendanceModel.findOne({
+      user: userId,
+      date: today,
+    });
+
+    if (!record) {
+      return res.status(400).json({
+        message:
+          "Attendance record not found for today. Please check in first.",
+      });
+    }
+
+    // Optional: prevent duplicate consecutive logs
+    const lastLog = record.locationLogs.slice(-1)[0];
+    if (!lastLog || lastLog.locationName !== locationName) {
+      record.locationLogs.push({ locationName });
+      await record.save();
+    }
+
+    res.status(200).json({
+      message: "Location added successfully",
+      locationLogs: record.locationLogs,
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
