@@ -14,6 +14,6 @@ router.post("/check-in", authMiddleware, checkIn);
 router.post("/check-out", authMiddleware, checkOut);
 router.get("/get-attendance", authMiddleware, getTodayAttendance);
 router.get("/send-monthly-report", sendMonthlyReports);
-router.get("/add-location", addLocation);
+router.post("/add-location", authMiddleware, addLocation);
 
 export default router;
