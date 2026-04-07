@@ -9,7 +9,7 @@ export const generateAttendanceExcel = async (records) => {
     { header: "Date", key: "date", width: 15 },
     { header: "Check In", key: "checkIn", width: 15 },
     { header: "Check Out", key: "checkOut", width: 15 },
-    { header: "Total Hours", key: "totalHours", width: 15 },
+    // { header: "Total Hours", key: "totalHours", width: 15 },
     { header: "Locations", key: "locations", width: 50 },
   ];
 
@@ -22,7 +22,7 @@ export const generateAttendanceExcel = async (records) => {
       checkOut: rec.checkOut
         ? new Date(rec.checkOut).toLocaleTimeString()
         : "--:--",
-      totalHours: rec.totalHours || "0:00",
+      // totalHours: rec.totalHours || "0:00",
       locations: rec.locationLogs
         ? rec.locationLogs
             .map(
