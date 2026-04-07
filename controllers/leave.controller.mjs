@@ -75,34 +75,23 @@ export const handleGetAll = async (req, res) => {
 
 export const handleGetById = async (req, res) => {
   try {
-    const {id} = req.params
-    if(!id){
-      return res.status(400).json({
-        message: "id is required"
-      })
-    }
-    const leave = await LeaveModel.findById(id);
+    const { id } = req.params;
 
-    if (!leave) {
-      return res.status(404).json({
-        success: false,
-        message: "Leave request not found"
-      });
-    }
-    
+    const leaves = await LeaveModel.find({ user: id }); // <-- FIX
+
     return res.status(200).json({
       success: true,
-      message: "Leave fetched",
-      data: leave
+      message: "Leaves fetched",
+      data: leaves
     });
+
   } catch (err) {
     return res.status(500).json({
       success: false,
       message: "Server error"
     });
   }
-}
-
+};
 export const handleUpdateLeaveStatus = async (req, res) => {
   try {
     const { id } = req.params;
