@@ -10,9 +10,9 @@ export const generateAttendanceExcel = async (records) => {
     { header: "Check In", key: "checkIn", width: 15 },
     { header: "Check Out", key: "checkOut", width: 15 },
     { header: "Total Hours", key: "totalHours", width: 15 },
+    { header: "Locations", key: "locations", width: 50 },
   ];
 
-  // Add data rows
   records.forEach((rec) => {
     sheet.addRow({
       date: new Date(rec.date).toLocaleDateString(),
@@ -23,10 +23,22 @@ export const generateAttendanceExcel = async (records) => {
         ? new Date(rec.checkOut).toLocaleTimeString()
         : "--:--",
       totalHours: rec.totalHours || "0:00",
+      locations: rec.locationLogs
+        ? rec.locationLogs
+            .map(
+              (loc) =>
+                `${loc.locationName || "Unknown"} (${new Date(
+                  loc.timestamp,
+                ).toLocaleTimeString()})`,
+            )
+            .join("\n")
+        : "--",
     });
   });
 
-  // Save file to buffer
+  // Enable text wrap for Locations column
+  sheet.getColumn("locations").alignment = { wrapText: true };
+
   const buffer = await workbook.xlsx.writeBuffer();
   return buffer;
 };
