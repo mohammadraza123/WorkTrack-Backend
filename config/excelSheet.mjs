@@ -15,21 +15,20 @@ export const generateAttendanceExcel = async (records) => {
 
   records.forEach((rec) => {
     sheet.addRow({
-      date: new Date(rec.date).toLocaleDateString(),
+      date: new Date(rec.date).toLocaleDateString("en-GB"), // keeps DD/MM/YYYY
       checkIn: rec.checkIn
-        ? new Date(rec.checkIn).toLocaleTimeString()
+        ? new Date(rec.checkIn).toLocaleTimeString("en-GB", { hour12: false })
         : "--:--",
       checkOut: rec.checkOut
-        ? new Date(rec.checkOut).toLocaleTimeString()
+        ? new Date(rec.checkOut).toLocaleTimeString("en-GB", { hour12: false })
         : "--:--",
-      // totalHours: rec.totalHours || "0:00",
       locations: rec.locationLogs
         ? rec.locationLogs
             .map(
               (loc) =>
                 `${loc.locationName || "Unknown"} (${new Date(
                   loc.timestamp,
-                ).toLocaleTimeString()})`,
+                ).toLocaleTimeString("en-GB", { hour12: false })})`,
             )
             .join("\n")
         : "--",
