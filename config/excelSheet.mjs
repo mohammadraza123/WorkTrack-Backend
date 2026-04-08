@@ -9,26 +9,30 @@ export const generateAttendanceExcel = async (records) => {
     { header: "Date", key: "date", width: 15 },
     { header: "Check In", key: "checkIn", width: 15 },
     { header: "Check Out", key: "checkOut", width: 15 },
-    // { header: "Total Hours", key: "totalHours", width: 15 },
     { header: "Locations", key: "locations", width: 50 },
   ];
 
+  // Helper to convert UTC to local time
+  const formatLocalTime = (utcDateStr) => {
+    if (!utcDateStr) return "--:--";
+    const date = new Date(utcDateStr);
+    return date.toLocaleTimeString("en-GB", { hour12: false });
+  };
+
   records.forEach((rec) => {
     sheet.addRow({
-      date: new Date(rec.date).toLocaleDateString("en-GB"), // keeps DD/MM/YYYY
-      checkIn: rec.checkIn
-        ? new Date(rec.checkIn).toLocaleTimeString("en-GB", { hour12: false })
-        : "--:--",
-      checkOut: rec.checkOut
-        ? new Date(rec.checkOut).toLocaleTimeString("en-GB", { hour12: false })
-        : "--:--",
+      date: rec.date
+        ? new Date(rec.date).toLocaleDateString("en-GB")
+        : "--/--/----",
+      checkIn: formatLocalTime(rec.checkIn),
+      checkOut: formatLocalTime(rec.checkOut),
       locations: rec.locationLogs
         ? rec.locationLogs
             .map(
               (loc) =>
-                `${loc.locationName || "Unknown"} (${new Date(
-                  loc.timestamp,
-                ).toLocaleTimeString("en-GB", { hour12: false })})`,
+                `${loc.locationName || "Unknown"} (${formatLocalTime(
+                  loc.timestamp
+                )})`
             )
             .join("\n")
         : "--",
