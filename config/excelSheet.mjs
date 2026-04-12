@@ -9,8 +9,16 @@ export const generateAttendanceExcel = async (records) => {
     { header: "Date", key: "date", width: 15 },
     { header: "Check In", key: "checkIn", width: 15 },
     { header: "Check Out", key: "checkOut", width: 15 },
-    { header: "Locations", key: "locations", width: 50 },
+    // { header: "Locations", key: "locations", width: 50 },
   ];
+
+  // Border style (reuse)
+  const borderStyle = {
+    top: { style: "thin" },
+    left: { style: "thin" },
+    bottom: { style: "thin" },
+    right: { style: "thin" },
+  };
 
   // Helper to convert UTC to local time
   const formatLocalTime = (utcDateStr) => {
@@ -19,28 +27,49 @@ export const generateAttendanceExcel = async (records) => {
     return date.toLocaleTimeString("en-GB", { hour12: false });
   };
 
+  // Style headers (center + bold + border)
+  sheet.getRow(1).eachCell((cell) => {
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+    cell.font = { bold: true };
+    cell.border = borderStyle;
+  });
+
   records.forEach((rec) => {
-    sheet.addRow({
+    const row = sheet.addRow({
       date: rec.date
         ? new Date(rec.date).toLocaleDateString("en-GB")
         : "--/--/----",
       checkIn: formatLocalTime(rec.checkIn),
       checkOut: formatLocalTime(rec.checkOut),
-      locations: rec.locationLogs
-        ? rec.locationLogs
-            .map(
-              (loc) =>
-                `${loc.locationName || "Unknown"} (${formatLocalTime(
-                  loc.timestamp
-                )})`
-            )
-            .join("\n")
-        : "--",
+      // locations: rec.locationLogs
+      //   ? rec.locationLogs
+      //       .map(
+      //         (loc) =>
+      //           `${loc.locationName || "Unknown"} (${formatLocalTime(
+      //             loc.timestamp,
+      //           )})`,
+      //       )
+      //       .join("\n")
+      //   : "--",
+    });
+
+    // Apply center alignment + border to every cell in row
+    row.eachCell((cell) => {
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: "center",
+        wrapText: true,
+      };
+      cell.border = borderStyle;
     });
   });
 
-  // Enable text wrap for Locations column
-  sheet.getColumn("locations").alignment = { wrapText: true };
+  // Enable wrap text for Locations column (extra safety)
+  // sheet.getColumn("locations").alignment = {
+  //   wrapText: true,
+  //   vertical: "middle",
+  //   horizontal: "center",
+  // };
 
   const buffer = await workbook.xlsx.writeBuffer();
   return buffer;

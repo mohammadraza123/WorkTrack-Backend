@@ -1,3 +1,4 @@
+import { generateAllEmployeesExcel } from "../config/allEmployessExcelSheet.mjs";
 import { generateAttendanceExcel } from "../config/excelSheet.mjs";
 import { sendEmailWithExcel } from "../config/sendEmailWithExcel.mjs";
 import AttendanceModel from "../models/attendance.model.mjs";
@@ -124,7 +125,12 @@ export const sendMonthlyReports = async (req, res) => {
       const buffer = await generateAttendanceExcel(records);
 
       // ✅ Send Email
-      await sendEmailWithExcel(user.email, buffer);
+      await sendEmailWithExcel({
+        toEmail: user.email,
+        buffer,
+        type: "employee",
+        employeeName: user.username,
+      });
 
       console.log(`✅ Email sent to ${user.email}`);
 
@@ -176,6 +182,31 @@ export const addLocation = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// send all employess Excel Sheet to HR
+export const sendHRReport = async (req, res) => {
+  try {
+    if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const users = await UserModel.find();
+
+    // ✅ Generate ONE Excel for all users
+    const buffer = await generateAllEmployeesExcel(users, AttendanceModel);
+
+    // ✅ Send to HR
+    await sendEmailWithExcel({
+      toEmail: process.env.HR_EMAIL,
+      buffer,
+      type: "hr",
+    });
+    res.json({ message: "HR report sent successfully" });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
