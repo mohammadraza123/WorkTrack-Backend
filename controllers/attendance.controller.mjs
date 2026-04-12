@@ -106,16 +106,24 @@ export const sendMonthlyReports = async (req, res) => {
     const users = await UserModel.find();
 
     const now = new Date();
-    const month = now.getMonth();
-    const year = now.getFullYear();
+
+    // 👉 previous month
+    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const year = prevMonthDate.getFullYear();
+    const month = String(prevMonthDate.getMonth() + 1).padStart(2, "0");
+
+    const start = `${year}-${month}-01`;
+    const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+    const end = `${year}-${month}-${lastDay}`;
 
     for (const user of users) {
       // ✅ Get monthly attendance
       const records = await AttendanceModel.find({
         user: user._id,
         date: {
-          $gte: `${year}-${String(month + 1).padStart(2, "0")}-01`,
-          $lte: `${year}-${String(month + 1).padStart(2, "0")}-31`,
+          $gte: start,
+          $lte: end,
         },
       });
 
