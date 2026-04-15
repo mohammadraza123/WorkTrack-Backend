@@ -130,7 +130,7 @@ export const sendMonthlyReports = async (req, res) => {
       if (!records.length) continue;
 
       // ✅ Generate Excel
-      const buffer = await generateAttendanceExcel(records);
+      const buffer = await generateAttendanceExcel(records); 
 
       // ✅ Send Email
       await sendEmailWithExcel({
