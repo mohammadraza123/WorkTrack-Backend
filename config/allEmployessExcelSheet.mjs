@@ -31,14 +31,23 @@ export const generateAllEmployeesExcel = async (users, AttendanceModel) => {
   let colIndex = 1;
 
   // ✅ 👉 PREVIOUS MONTH LOGIC
-  const now = new Date();
-  const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  // const now = new Date();
+  // const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-  const year = prevMonthDate.getFullYear();
-  const month = String(prevMonthDate.getMonth() + 1).padStart(2, "0");
+  // const year = prevMonthDate.getFullYear();
+  // const month = String(prevMonthDate.getMonth() + 1).padStart(2, "0");
+
+  // const start = `${year}-${month}-01`;
+  // const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+  // const end = `${year}-${month}-${lastDay}`;
+
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
 
   const start = `${year}-${month}-01`;
-  const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+  const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
   const end = `${year}-${month}-${lastDay}`;
 
   console.log("📊 Generating report for:", start, "to", end);

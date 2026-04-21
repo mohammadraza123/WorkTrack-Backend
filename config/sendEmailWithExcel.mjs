@@ -6,14 +6,22 @@ export const sendEmailWithExcel = async ({
   type = "employee",
   employeeName = "",
 }) => {
+  // const now = new Date();
+  // const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  // const monthName = prevMonthDate.toLocaleString("en-US", {
+  //   month: "long",
+  // });
+
+  // const year = prevMonthDate.getFullYear();
+
   const now = new Date();
-  const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-  const monthName = prevMonthDate.toLocaleString("en-US", {
-    month: "long",
-  });
+const monthName = now.toLocaleString("en-US", {
+  month: "long",
+});
 
-  const year = prevMonthDate.getFullYear();
+const year = now.getFullYear();
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",

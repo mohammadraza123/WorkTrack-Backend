@@ -108,13 +108,17 @@ export const sendMonthlyReports = async (req, res) => {
     const now = new Date();
 
     // 👉 previous month
-    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    // const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    const year = prevMonthDate.getFullYear();
-    const month = String(prevMonthDate.getMonth() + 1).padStart(2, "0");
+    // const year = prevMonthDate.getFullYear();
+    // const month = String(prevMonthDate.getMonth() + 1).padStart(2, "0");
+    // const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+    const currentDate = new Date();
 
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
     const start = `${year}-${month}-01`;
-    const lastDay = new Date(year, prevMonthDate.getMonth() + 1, 0).getDate();
+    const lastDay = new Date(year, currentDate.getMonth() + 1, 0).getDate();
     const end = `${year}-${month}-${lastDay}`;
 
     for (const user of users) {
@@ -130,7 +134,7 @@ export const sendMonthlyReports = async (req, res) => {
       if (!records.length) continue;
 
       // ✅ Generate Excel
-      const buffer = await generateAttendanceExcel(records); 
+      const buffer = await generateAttendanceExcel(records);
 
       // ✅ Send Email
       await sendEmailWithExcel({
