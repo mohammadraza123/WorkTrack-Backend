@@ -4,6 +4,9 @@ import {
   addLocation,
   checkIn,
   checkOut,
+  deleteAttendanceRecord,
+  editAttendanceRecord,
+  getAllEmployeesAttendance,
   getTodayAttendance,
   sendHRReport,
   sendMonthlyReports,
@@ -17,5 +20,8 @@ router.get("/get-attendance", authMiddleware, getTodayAttendance);
 router.post("/add-location", authMiddleware, addLocation);
 router.get("/send-monthly-report", sendMonthlyReports);
 router.get("/send-hr-report", sendHRReport);
+router.get("/get-allEmployess-attendence", getAllEmployeesAttendance);
+router.patch("/attendance/:id", editAttendanceRecord);
+router.delete("/attendance/:id", deleteAttendanceRecord);
 
 export default router;

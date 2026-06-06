@@ -222,3 +222,95 @@ export const sendHRReport = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getAllEmployeesAttendance = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const attendance = await AttendanceModel.find()
+      .populate("user", "username")
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await AttendanceModel.countDocuments();
+
+    return res.status(200).json({
+      success: true,
+      data: attendance,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const editAttendanceRecord = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { checkIn, checkOut } = req.body;
+
+    // check if record exists
+    const record = await AttendanceModel.findById(id);
+
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: "Attendance record not found",
+      });
+    }
+
+    // update record
+    record.checkIn = checkIn || record.checkIn;
+    record.checkOut = checkOut || record.checkOut;
+
+    const updatedRecord = await record.save();
+
+    return res.status(200).json({
+      success: true,
+      data: updatedRecord,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteAttendanceRecord = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const record = await AttendanceModel.findById(id);
+
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: "Attendance record not found",
+      });
+    }
+
+    await AttendanceModel.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Attendance record deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
